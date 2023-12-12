@@ -3,8 +3,8 @@ use rocket::serde::json::Json;
 use rocket::{get, post};
 use serde::{Deserialize, Serialize};
 
+use crate::app::impls::{parse_ps, parse_titles, translate};
 use crate::util::json_parse;
-use crate::app::{parse_ps, parse_titles};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Url {
@@ -38,9 +38,31 @@ pub async fn desc(id: String) -> Result<Json<Vec<[String; 2]>>, status::BadReque
                 .map_err(|err| status::BadRequest(format!("{:?}", err)))?,
         ))
     } else {
-        Ok(Json(
-            vec![[String::from("p"), String::from(r#"<em>The query param "id" is wrong.</em>"#)]],
-        ))
+        Ok(Json(vec![[
+            String::from("p"),
+            String::from(r#"<em>The query param "id" is wrong.</em>"#),
+        ]]))
     }
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+struct Words {
+    words: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct TransResult {
+    result: Vec<String>,
+}
+
+#[post("/api/trans", format = "json", data = "<data>")]
+pub async fn trans(data: String) -> Result<Json<TransResult>, status::BadRequest<String>> {
+    let data = json_parse::parse::<Words>(data.as_str())
+        .map_err(|err| status::BadRequest(err.to_string()))?
+        .words;
+    Ok(Json(TransResult {
+        result: translate::translate(data)
+            .await
+            .map_err(|err| status::BadRequest(format!("{:?}", err)))?,
+    }))
+}

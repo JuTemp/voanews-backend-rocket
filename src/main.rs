@@ -2,10 +2,8 @@ mod app;
 mod util;
 mod my_trait;
 
-use app::main::desc;
+use app::main::{today, desc, trans};
 use rocket::{catch, fs::FileServer, get, response::Redirect, catchers, routes};
-
-use crate::app::main::today;
 
 // #[get("/")]
 fn root() -> FileServer {
@@ -28,7 +26,7 @@ pub async fn main() -> Result<(), rocket::Error> {
         .configure(rocket::Config::figment().merge(("port", 26890)))
         // .mount("/static/", FileServer::from(crate::MP4_PATH))
         .mount("/", root())
-        .mount("/", routes![redirect_desc, today, desc])
+        .mount("/", routes![redirect_desc, today, desc, trans])
         .register("/", catchers![not_found])
         .launch()
         .await?;
