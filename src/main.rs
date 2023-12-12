@@ -1,7 +1,11 @@
 mod app;
 mod util;
+mod my_trait;
 
+use app::main::desc;
 use rocket::{catch, fs::FileServer, get, response::Redirect, catchers, routes};
+
+use crate::app::main::today;
 
 // #[get("/")]
 fn root() -> FileServer {
@@ -9,7 +13,7 @@ fn root() -> FileServer {
 }
 
 #[get("/<id>")]
-fn redirect_desc(id: String) -> Redirect {
+fn redirect_desc(id: i32) -> Redirect {
     Redirect::to(format!("/#/desc?id={}", id))
 }
 
@@ -24,7 +28,7 @@ pub async fn main() -> Result<(), rocket::Error> {
         .configure(rocket::Config::figment().merge(("port", 26890)))
         // .mount("/static/", FileServer::from(crate::MP4_PATH))
         .mount("/", root())
-        .mount("/", routes![redirect_desc])
+        .mount("/", routes![redirect_desc, today, desc])
         .register("/", catchers![not_found])
         .launch()
         .await?;

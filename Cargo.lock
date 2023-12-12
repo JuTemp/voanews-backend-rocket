@@ -2017,6 +2017,7 @@ name = "voanews-backend-rocket"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "base64",
  "regex",
  "reqwest",
  "rocket",
